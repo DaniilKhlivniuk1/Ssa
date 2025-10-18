@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Холостяк — шоу для друга</title>
+<style>
+  :root{
+    --bg:#ffeef6; --card:#fff5f9; --accent:#ff5aa6; --muted:#f6dfea;
+    --text:#5a2b3d; --shadow: 0 6px 20px rgba(165,30,80,0.12);
+    font-family: Inter, system-ui, Arial, sans-serif;
+  }
+  html,body{height:100%; margin:0; background:linear-gradient(180deg,#fff0f6 0%, #ffeef6 60%); color:var(--text); overflow:hidden;}
+  .wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:32px; position:relative; z-index:2;}
+  header{font-weight:800; font-size:34px; letter-spacing:1px; text-shadow:0 2px 6px rgba(255,90,166,0.25);}
+  .viewer{
+    width:760px; max-width:95vw; background:var(--card); border-radius:12px; padding:28px; box-shadow:var(--shadow);
+    border:1px solid rgba(255,90,166,0.12); text-align:center;
+  }
+  .meta{color:var(--accent); font-weight:600; margin-bottom:18px}
+  .photos{display:flex; gap:14px; justify-content:center; margin:18px 0;}
+  .photo{width:140px; height:160px; border-radius:10px; overflow:hidden; box-shadow:0 8px 18px rgba(0,0,0,0.08); background:#111; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; letter-spacing:0.5px; opacity:0.9;}
+  .controls{display:flex; gap:10px; justify-content:center; margin-top:16px; align-items:center;}
+  .btn{
+    padding:10px 18px; border-radius:999px; border:none; cursor:pointer; font-weight:700;
+    box-shadow:0 6px 16px rgba(0,0,0,0.06);
+  }
+  .btn-pink{background:var(--accent); color:white}
+  .btn-soft{background:white; color:var(--text); border:1px solid rgba(0,0,0,0.06)}
+  .small{font-size:13px; padding:8px 14px}
+  .like{background:#dbffef; color:#0a6b4e}
+  .dislike{background:#ffdfe6; color:#6b0a2a}
+  .nav{display:flex; gap:12px; justify-content:center; margin-top:14px}
+  .status{margin-top:8px; color:#7b4b63}
+  .footer-actions{display:flex; gap:12px; justify-content:center; margin-top:18px}
+  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); z-index:5;}
+  .modal.open{display:flex}
+  .modal-card{background:white; padding:18px; border-radius:12px; width:560px; max-width:90vw; box-shadow:0 12px 40px rgba(0,0,0,0.25)}
+  .liked-row{display:flex; gap:12px; align-items:center; padding:8px 0; border-bottom:1px dashed #eee}
+  .tiny{font-size:13px; color:#6a4f60}
+  @media (max-width:520px){
+    .photos{flex-direction:column}
+    .photo{width:90vw; height:160px}
+  }
+
+  /* 🌹 Анимация лепестков */
+  .petal {
+    position: fixed;
+    top: -10vh;
+    background: rgba(255, 105, 180, 0.85);
+    width: 18px; height: 14px;
+    border-radius: 70% 70% 70% 70%;
+    opacity: 0.8;
+    animation: fall linear infinite;
+    z-index: 1;
+  }
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>Холостяк — шоу для друга</header>
+
+    <div class="viewer" id="viewer">
+      <div class="meta" id="meta">Участница: 1</div>
+      <div style="font-weight:700; font-size:18px" id="nameLine">Имя — Возраст • Город</div>
+      <div class="photos" id="photos"></div>
+
+      <div class="controls">
+        <button class="btn small like" id="btn-like">Лайк</button>
+        <button class="btn small dislike" id="btn-dislike">Дизлайк</button>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn-soft small" id="prev">← Предыдущая</button>
+        <button class="btn btn-pink small" id="next">Следующая →</button>
+      </div>
+
+      <div class="status" id="status">Статус: не выбран</div>
+
+      <div class="footer-actions">
+        <button class="btn btn-soft small" id="view-liked">Посмотреть понравившихся</button>
+        <button class="btn small" id="reset">Сбросить все</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <h3 style="margin:0 0 8px 0">Понравившиеся</h3>
+      <div id="likedList" style="max-height:320px; overflow:auto"></div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px">
+        <button class="btn btn-soft small" id="closeModal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// === Лепестки ===
+function createPetals(count=25) {
+  for(let i=0; i<count; i++){
+    const petal = document.createElement('div');
+    petal.classList.add('petal');
+    const size = 10 + Math.random()*10;
+    petal.style.width = `${size}px`;
+    petal.style.height = `${size*0.8}px`;
+    petal.style.left = Math.random()*100 + 'vw';
+    petal.style.animationDuration = 5 + Math.random()*5 + 's';
+    petal.style.animationDelay = Math.random()*5 + 's';
+    petal.style.background = `rgba(255, ${80+Math.random()*50}, ${140+Math.random()*60}, 0.85)`;
+    document.body.appendChild(petal);
+  }
+}
+createPetals(25);
+
+// === Логика ===
+const participants = [
+  { id:1, name:'Участница 1', age:'—', city:'—', photos:[] },
+  { id:2, name:'Участница 2', age:'—', city:'—', photos:[] },
+  { id:3, name:'Участница 3', age:'—', city:'—', photos:[] },
+];
+
+let index = 0;
+const results = {};
+const el = {
+  meta: document.getElementById('meta'),
+  nameLine: document.getElementById('nameLine'),
+  photos: document.getElementById('photos'),
+  status: document.getElementById('status'),
+  btnLike: document.getElementById('btn-like'),
+  btnDislike: document.getElementById('btn-dislike'),
+  prev: document.getElementById('prev'),
+  next: document.getElementById('next'),
+  viewLiked: document.getElementById('view-liked'),
+  likedList: document.getElementById('likedList'),
+  modal: document.getElementById('modal'),
+  closeModal: document.getElementById('closeModal'),
+  reset: document.getElementById('reset'),
+};
+
+function render(){
+  const p = participants[index];
+  el.meta.textContent = `Участница: ${index+1} / ${participants.length}`;
+  el.nameLine.textContent = `${p.name} — ${p.age} • ${p.city}`;
+  el.photos.innerHTML = '';
+  for(let i=0;i<2;i++){
+    const div = document.createElement('div');
+    div.className = 'photo';
+    div.textContent = 'Фото скрыто';
+    el.photos.appendChild(div);
+  }
+  const r = results[p.id];
+  el.status.textContent = r ? `Статус: ${r==='like'?'Лайк ✅':'Дизлайк ❌'}` : 'Статус: не выбран(а)';
+}
+
+el.btnLike.onclick = ()=>{ results[participants[index].id]='like'; next(); };
+el.btnDislike.onclick = ()=>{ results[participants[index].id]='dislike'; next(); };
+el.prev.onclick = ()=>{ if(index>0){index--; render();}};
+el.next.onclick = ()=>{ next(); };
+
+function next(){
+  if(index<participants.length-1) index++;
+  render();
+}
+
+el.viewLiked.onclick = ()=>{
+  const liked = participants.filter(p=>results[p.id]==='like');
+  el.likedList.innerHTML = liked.length
+    ? liked.map(p=>`<div class='liked-row'><b>${p.name}</b>, ${p.age}<br><span class='tiny'>${p.city}</span></div>`).join('')
+    : "<div class='tiny'>Пока никого нет 🌹</div>";
+  el.modal.classList.add('open');
+};
+el.closeModal.onclick = ()=> el.modal.classList.remove('open');
+el.modal.onclick = e=>{ if(e.target===el.modal) el.modal.classList.remove('open'); };
+el.reset.onclick = ()=>{ for(const k in results) delete results[k]; index=0; render(); };
+document.addEventListener('keydown', e=>{
+  if(e.code==='ArrowLeft') el.prev.click();
+  if(e.code==='ArrowRight') el.next.click();
+  if(e.code==='Space'){e.preventDefault(); el.btnLike.click();}
+});
+
+render();
+</script>
+</body>
+</html>
