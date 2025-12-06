@@ -3,28 +3,81 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Холостяк </title>
+<title>Холостяк</title>
+
 <style>
-  :root{
+  :root {
     --bg:#ffeef6; --card:#fff5f9; --accent:#ff5aa6; --muted:#f6dfea;
     --text:#5a2b3d; --shadow: 0 6px 20px rgba(165,30,80,0.12);
     font-family: Inter, system-ui, Arial, sans-serif;
   }
-  html,body{height:100%; margin:0; background:linear-gradient(180deg,#fff0f6 0%, #ffeef6 60%); color:var(--text); overflow:hidden;}
-  .wrap{min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:32px; position:relative; z-index:2;}
-  header{font-weight:800; font-size:34px; letter-spacing:1px; text-shadow:0 2px 6px rgba(255,90,166,0.25);}
-  .viewer{
-    width:760px; max-width:95vw; background:var(--card); border-radius:12px; padding:28px; box-shadow:var(--shadow);
-    border:1px solid rgba(255,90,166,0.12); text-align:center;
+
+  html, body {
+    height:100%;
+    margin:0;
+    background:linear-gradient(180deg,#fff0f6 0%, #ffeef6 60%);
+    color:var(--text);
+    overflow:hidden;
   }
-  .meta{color:var(--accent); font-weight:600; margin-bottom:18px}
-  .photos{display:flex; gap:14px; justify-content:center; margin:18px 0;}
-  .photo{width:140px; height:160px; border-radius:10px; overflow:hidden; box-shadow:0 8px 18px rgba(0,0,0,0.08); background:#111; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; letter-spacing:0.5px; opacity:0.9;}
+
+  .wrap {
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:24px;
+    padding:32px;
+    position:relative;
+    z-index:2;
+  }
+
+  header {
+    font-weight:800;
+    font-size:34px;
+    letter-spacing:1px;
+    text-shadow:0 2px 6px rgba(255,90,166,0.25);
+  }
+
+  .viewer {
+    width:760px;
+    max-width:95vw;
+    background:var(--card);
+    border-radius:12px;
+    padding:28px;
+    box-shadow:var(--shadow);
+    border:1px solid rgba(255,90,166,0.12);
+    text-align:center;
+  }
+
+  .meta { color:var(--accent); font-weight:600; margin-bottom:18px }
+  .photos { display:flex; gap:14px; justify-content:center; margin:18px 0; flex-wrap:wrap; }
+
+  .photo {
+    width:140px;
+    height:160px;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 8px 18px rgba(0,0,0,0.08);
+    background:#111;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:12px;
+    letter-spacing:0.5px;
+    opacity:0.9;
+    cursor:pointer;
+  }
+
+  .photo img, .photo video {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
   .controls{display:flex; gap:10px; justify-content:center; margin-top:16px; align-items:center;}
-  .btn{
-    padding:10px 18px; border-radius:999px; border:none; cursor:pointer; font-weight:700;
-    box-shadow:0 6px 16px rgba(0,0,0,0.06);
-  }
+  .btn{padding:10px 18px; border-radius:999px; border:none; cursor:pointer; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,0.06);}
   .btn-pink{background:var(--accent); color:white}
   .btn-soft{background:white; color:var(--text); border:1px solid rgba(0,0,0,0.06)}
   .small{font-size:13px; padding:8px 14px}
@@ -33,33 +86,58 @@
   .nav{display:flex; gap:12px; justify-content:center; margin-top:14px}
   .status{margin-top:8px; color:#7b4b63}
   .footer-actions{display:flex; gap:12px; justify-content:center; margin-top:18px}
-  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); z-index:5;}
+
+  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); z-index:5;}
   .modal.open{display:flex}
   .modal-card{background:white; padding:18px; border-radius:12px; width:560px; max-width:90vw; box-shadow:0 12px 40px rgba(0,0,0,0.25)}
   .liked-row{display:flex; gap:12px; align-items:center; padding:8px 0; border-bottom:1px dashed #eee}
   .tiny{font-size:13px; color:#6a4f60}
-  @media (max-width:520px){
-    .photos{flex-direction:column}
+
+  /* Модальное фото/видео */
+  .media-modal img, .media-modal video {
+    max-width:90vw;
+    max-height:90vh;
+    border-radius:12px;
+  }
+
+  @media(max-width:520px){
+    .photos{flex-direction:column; gap:10px;}
     .photo{width:90vw; height:160px}
   }
 
-  /* 🌹 Анимация лепестков */
+  /* Лепестки-сердца */
   .petal {
     position: fixed;
     top: -10vh;
-    background: rgba(255, 105, 180, 0.85);
-    width: 18px; height: 14px;
-    border-radius: 70% 70% 70% 70%;
-    opacity: 0.8;
-    animation: fall linear infinite;
+    width: 18px;
+    height: 18px;
+    background: transparent;
+    opacity: 0.9;
     z-index: 1;
+    transform: rotate(45deg);
+    animation: fall linear infinite;
   }
+
+  .petal::before,
+  .petal::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: 50%;
+  }
+
+  .petal::before { left: -50%; }
+  .petal::after { top: -50%; }
+
   @keyframes fall {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    0% { transform: translateY(0) rotate(0deg) rotate(45deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg) rotate(45deg); opacity: 0; }
   }
 </style>
 </head>
+
 <body>
   <div class="wrap">
     <header>Холостяк</header>
@@ -67,7 +145,9 @@
     <div class="viewer" id="viewer">
       <div class="meta" id="meta">Участница: 1</div>
       <div style="font-weight:700; font-size:18px" id="nameLine">Имя — Возраст • Город</div>
+
       <div class="photos" id="photos"></div>
+      <p id="hobbies" style="margin-top:12px; font-style:italic;"></p>
 
       <div class="controls">
         <button class="btn small like" id="btn-like">Лайк</button>
@@ -88,6 +168,7 @@
     </div>
   </div>
 
+  <!-- Модальное окно для понравившихся -->
   <div class="modal" id="modal">
     <div class="modal-card">
       <h3 style="margin:0 0 8px 0">Понравившиеся</h3>
@@ -98,37 +179,56 @@
     </div>
   </div>
 
+  <!-- Модальное окно для фото/видео -->
+  <div class="modal" id="mediaModal">
+    <div class="media-modal" id="mediaContent"></div>
+  </div>
+
 <script>
-// === Лепестки ===
-function createPetals(count=25) {
-  for(let i=0; i<count; i++){
-    const petal = document.createElement('div');
-    petal.classList.add('petal');
-    const size = 10 + Math.random()*10;
+// ❤️ Лепестки
+function createPetals(count = 25) {
+  for (let i = 0; i < count; i++) {
+    const petal = document.createElement("div");
+    petal.classList.add("petal");
+    const size = 12 + Math.random() * 12;
     petal.style.width = `${size}px`;
-    petal.style.height = `${size*0.8}px`;
-    petal.style.left = Math.random()*100 + 'vw';
-    petal.style.animationDuration = 5 + Math.random()*5 + 's';
-    petal.style.animationDelay = Math.random()*5 + 's';
-    petal.style.background = `rgba(255, ${80+Math.random()*50}, ${140+Math.random()*60}, 0.85)`;
+    petal.style.height = `${size}px`;
+    const r = 255;
+    const g = 50 + Math.random() * 80;
+    const b = 120 + Math.random() * 80;
+    petal.style.background = `rgba(${r}, ${g}, ${b}, 0.95)`;
+    petal.style.left = Math.random() * 100 + "vw";
+    petal.style.animationDuration = 5 + Math.random() * 6 + "s";
+    petal.style.animationDelay = Math.random() * 5 + "s";
     document.body.appendChild(petal);
   }
 }
-createPetals(25);
+createPetals(30);
 
-// === Логика ===
+// ==== ДАННЫЕ УЧАСТНИКОВ ====
 const participants = [
-  { id:1, name:'Участница 1', age:'—', city:'—', photos:[] },
-  { id:2, name:'Участница 2', age:'—', city:'—', photos:[] },
-  { id:3, name:'Участница 3', age:'—', city:'—', photos:[] },
+  { id:1, name:'Участница 1', age:'15 лет', city:'Colchester', hobbies:'...', photos:['images/p1_1.jpg','images/p1_2.jpg','images/p1_3.jpg'] },
+  { id:2, name:'Участница 2', age:'16', city:'Санкт-Петербург', hobbies:'...', photos:['images/p2_1.jpg','images/p2_2.jpg','images/p2_3.jpg'] },
+  { id:3, name:'Участница 3', age:'15', city:'Казань', hobbies:'...', photos:['images/p3_1.jpg','images/p3_2.jpg','images/p3_3.jpg'] },
+  { id:4, name:'Участница 4', age:'16', city:'Москва', hobbies:'...', photos:['images/p4_1.jpg','images/p4_2.jpg','images/p4_3.jpg'] },
+  { id:5, name:'Участница 5', age:'17', city:'Лондон', hobbies:'...', photos:['images/p5_1.jpg','images/p5_2.jpg','images/p5_3.jpg','images/p5_4.jpg'] },
+  { id:6, name:'Участница 6', age:'15', city:'Берлин', hobbies:'...', photos:['images/p6_1.jpg','images/p6_2.jpg'] },
+  { id:7, name:'Участница 7', age:'16', city:'Париж', hobbies:'...', photos:['images/p7_1.jpg','images/p7_2.jpg'] },
+  { id:8, name:'Участница 8', age:'15', city:'Рим', hobbies:'...', photos:['images/p8_1.jpg','images/p8_2.jpg','images/p8_3.jpg','images/p8_4.jpg'] },
+  { id:9, name:'Участница 9', age:'16', city:'Мадрид', hobbies:'...', videos:['videos/p9_1.mp4'] },
+  { id:10, name:'Участница 10', age:'15', city:'Амстердам', hobbies:'...', photos:['images/p10_1.jpg','images/p10_2.jpg','images/p10_3.jpg'] },
+  { id:11, name:'Участница 11', age:'17', city:'Вена', hobbies:'...', photos:['images/p11_1.jpg'] },
+  { id:12, name:'Участница 12', age:'16', city:'Прага', hobbies:'...', videos:['videos/p12_1.mp4'] },
 ];
 
 let index = 0;
 const results = {};
+
 const el = {
   meta: document.getElementById('meta'),
   nameLine: document.getElementById('nameLine'),
   photos: document.getElementById('photos'),
+  hobbies: document.getElementById('hobbies'),
   status: document.getElementById('status'),
   btnLike: document.getElementById('btn-like'),
   btnDislike: document.getElementById('btn-dislike'),
@@ -139,33 +239,62 @@ const el = {
   modal: document.getElementById('modal'),
   closeModal: document.getElementById('closeModal'),
   reset: document.getElementById('reset'),
+  mediaModal: document.getElementById('mediaModal'),
+  mediaContent: document.getElementById('mediaContent'),
 };
 
+// ===== Рендер участника =====
 function render(){
   const p = participants[index];
   el.meta.textContent = `Участница: ${index+1} / ${participants.length}`;
   el.nameLine.textContent = `${p.name} — ${p.age} • ${p.city}`;
+
+  // ===== Очистка контейнера фото =====
   el.photos.innerHTML = '';
-  for(let i=0;i<2;i++){
-    const div = document.createElement('div');
-    div.className = 'photo';
-    div.textContent = 'Фото скрыто';
-    el.photos.appendChild(div);
+
+  // ===== Рендер фото =====
+  if(p.photos){
+    for(const file of p.photos){
+      const div = document.createElement('div');
+      div.className = 'photo';
+      const img = document.createElement('img');
+      img.src = file;
+      img.alt = p.name;
+      div.appendChild(img);
+      div.onclick = ()=>openMedia(file,'img');
+      el.photos.appendChild(div);
+    }
   }
+
+  // ===== Рендер видео =====
+  if(p.videos){
+    for(const file of p.videos){
+      const div = document.createElement('div');
+      div.className = 'photo';
+      const vid = document.createElement('video');
+      vid.src = file;
+      vid.controls = false;
+      div.appendChild(vid);
+      div.onclick = ()=>openMedia(file,'video');
+      el.photos.appendChild(div);
+    }
+  }
+
+  el.hobbies.textContent = `Увлечения: ${p.hobbies}`;
   const r = results[p.id];
-  el.status.textContent = r ? `Статус: ${r==='like'?'Лайк ✅':'Дизлайк ❌'}` : 'Статус: не выбран(а)';
+  el.status.textContent = r ? `Статус: ${r==='like'?'Лайк ✅':'Дизлайк ❌'}` : 'Статус: не выбран';
 }
 
-el.btnLike.onclick = ()=>{ results[participants[index].id]='like'; next(); };
-el.btnDislike.onclick = ()=>{ results[participants[index].id]='dislike'; next(); };
-el.prev.onclick = ()=>{ if(index>0){index--; render();}};
-el.next.onclick = ()=>{ next(); };
+// ===== Лайки / Дизлайки =====
+el.btnLike.onclick = ()=>{results[participants[index].id]='like'; next();};
+el.btnDislike.onclick = ()=>{results[participants[index].id]='dislike'; next();};
 
-function next(){
-  if(index<participants.length-1) index++;
-  render();
-}
+// ===== Навигация =====
+el.prev.onclick = ()=>{if(index>0){index--; render();}};
+el.next.onclick = ()=> next();
+function next(){ if(index<participants.length-1) index++; render(); }
 
+// ===== Понравившиеся =====
 el.viewLiked.onclick = ()=>{
   const liked = participants.filter(p=>results[p.id]==='like');
   el.likedList.innerHTML = liked.length
@@ -175,13 +304,36 @@ el.viewLiked.onclick = ()=>{
 };
 el.closeModal.onclick = ()=> el.modal.classList.remove('open');
 el.modal.onclick = e=>{ if(e.target===el.modal) el.modal.classList.remove('open'); };
-el.reset.onclick = ()=>{ for(const k in results) delete results[k]; index=0; render(); };
+el.reset.onclick = ()=>{for(const k in results) delete results[k]; index=0; render();}
+
+// ===== Модальное окно для фото/видео =====
+function openMedia(file,type){
+  el.mediaContent.innerHTML = '';
+  if(type==='img'){
+    const img = document.createElement('img');
+    img.src = file;
+    el.mediaContent.appendChild(img);
+  } else if(type==='video'){
+    const vid = document.createElement('video');
+    vid.src = file;
+    vid.controls = true;
+    vid.autoplay = true;
+    el.mediaContent.appendChild(vid);
+  }
+  el.mediaModal.classList.add('open');
+}
+el.mediaModal.onclick = e=>{
+  if(e.target===el.mediaModal) el.mediaModal.classList.remove('open');
+};
+
+// ===== Клавиши =====
 document.addEventListener('keydown', e=>{
   if(e.code==='ArrowLeft') el.prev.click();
   if(e.code==='ArrowRight') el.next.click();
-  if(e.code==='Space'){e.preventDefault(); el.btnLike.click();}
+  if(e.code==='Space'){ e.preventDefault(); el.btnLike.click(); }
 });
 
+// ===== Инициализация =====
 render();
 </script>
 </body>
